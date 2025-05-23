@@ -1,0 +1,13 @@
+This folder should contain the binaries or soft-links to the solver.
+
+EXAMPLE
+
+   - bin/cbc -> /usr/bin/cbc
+   - bin/cplex -> /usr/bin/cplex
+   - bin/gurobi -> /usr/bin/gurobi_cl
+   - bin/mosek -> /usr/bin/mosek
+   - bin/scip -> /usr/bin/scip.linux.x86_64.gnu.opt.spx
+   - bin/xpress -> /usr/bin/xpress
+
+Additionally, for running permuted instances, you need a softlink
+named "bin/permute" pointing to a SCIP binary of version 4.0 or higher.
