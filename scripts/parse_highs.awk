@@ -34,13 +34,14 @@ BEGIN {
 /^  Dual bound / {
   db = $3 + 0.0;
 }
+match($0, "Objective value[[:space:]]*:") {
+  pb = $4 + 0.0;
+}
 
 # solving status
 
-/^  Status/ {
-    st = $2;
-    aborted = 0;
-    timeout = 0;
+match($0, /Status[ \t]*/) {
+    st = substr($0, index($0, $2));
     if (st == "Optimal") {
         aborted = 0;
     } else if (st == "Infeasible") {
@@ -50,16 +51,16 @@ BEGIN {
     } else if (st == "Primal infeasible or unbounded") {
         aborted = 0;
     } else if (st == "Time limit reached") {
+        aborted = 0;
         timeout = 1;
     }
 }
 
-/^Model status        :/ {
-    st = $2;
-    aborted = 0;
-    timeout = 0;
+match($0, "Model status[[:space:]]*:") {
+    st = substr($0, index($0, $4));
     if (st == "Optimal") {
         aborted = 0;
+        db = pb;
     } else if (st == "Infeasible") {
         aborted = 0;
     } else if (st == "Unbounded") {
@@ -67,6 +68,7 @@ BEGIN {
     } else if (st == "Primal infeasible or unbounded") {
         aborted = 0;
     } else if (st == "Time limit reached") {
+        aborted = 0;
         timeout = 1;
     }
 }
