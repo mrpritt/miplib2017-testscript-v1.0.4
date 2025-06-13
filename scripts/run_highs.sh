@@ -49,7 +49,7 @@ then
     else
 	# grep objective out off the HiGHS log file
 	grep "Objective " $SOLFILE | sed 's/.*Objective \([0-9\.eE+-]*\).*/=obj= \1/g' > $SOLFILE.tmp
-    sed -n '/# Columns/,/^[[:space:]]*$/p' $SOLFILE | tail -n +2 >> $SOLFILE.tmp
+    sed -n '/# Columns/,/# Rows/p' $SOLFILE | tail -n +2 | head -n -1 >> $SOLFILE.tmp
 	mv $SOLFILE.tmp $SOLFILE
    fi
 fi

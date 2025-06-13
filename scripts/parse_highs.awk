@@ -53,3 +53,20 @@ BEGIN {
         timeout = 1;
     }
 }
+
+/^Model status        :/ {
+    st = $2;
+    aborted = 0;
+    timeout = 0;
+    if (st == "Optimal") {
+        aborted = 0;
+    } else if (st == "Infeasible") {
+        aborted = 0;
+    } else if (st == "Unbounded") {
+        aborted = 0;
+    } else if (st == "Primal infeasible or unbounded") {
+        aborted = 0;
+    } else if (st == "Time limit reached") {
+        timeout = 1;
+    }
+}
