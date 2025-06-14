@@ -22,10 +22,9 @@ BEGIN {
    gap = 0;
 }
 
-# The solver version   print STDERR "CBC version: " solverversion;
-
 /^Version:/ {
    version = $2;
+   solverversion = version;
 }
 
 /^Revision Number:/ {
@@ -79,11 +78,17 @@ BEGIN {
    bbnodes = $3
 }
 
-END {
-   # set default values
-   #print STDERR "CBC version: ," solverversion ",";
-
-   if (solverversion == "?") {
-    # solverversion = version;
+/^[^ ]+ - objective value/ {
+   pb = $5;
+   aborted = 0;
+   status = $1;
+   if (status == "Optimal") {
+      timeout = 0;
+       db = pb;
    }
+}
+
+/Stopped on time limit/ {
+   timeout = 1;
+   aborted = 0;
 }
