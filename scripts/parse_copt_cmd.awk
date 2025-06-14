@@ -54,6 +54,8 @@ match($0, "MIP status[[:space:]]*: ") {
     aborted = 0;
    } else if (st == "stopped (memory exceeded)") {
     timeout = 1;
+   } else if (st == "stopped (time limit reached)") {
+    timeout = 1;
    }
 }
 match($0, "Solution status[[:space:]]*: ") {
@@ -67,7 +69,7 @@ match($0, /^Status:[[:space:]]*([^ ]+)[[:space:]]+Objective:[[:space:]]*([^ ]+)[
     pb = arr[2];
     if (status == "Optimal") {
         aborted = 0;
-        timeout = 1
+        timeout = 0;
         db = pb;
     }
 }

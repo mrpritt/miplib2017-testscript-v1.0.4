@@ -34,8 +34,9 @@ BEGIN {
 /^  Dual bound / {
   db = $3 + 0.0;
 }
-match($0, "Objective value[[:space:]]*:") {
+match($0, "Objective value[[:space:]]*:") { ## LP
   pb = $4 + 0.0;
+  db = pb;
 }
 
 # solving status
@@ -44,7 +45,6 @@ match($0, /Status[ \t]*/) {
     st = substr($0, index($0, $2));
     if (st == "Optimal") {
         aborted = 0;
-        db = pb;
     } else if (st == "Infeasible") {
         pb = +infty;
         db = +infty;
@@ -68,7 +68,6 @@ match($0, "Model status[[:space:]]*:") {
     st = substr($0, index($0, $4));
     if (st == "Optimal") {
         aborted = 0;
-        db = pb;
     } else if (st == "Infeasible") {
         pb = +infty;
         db = +infty;

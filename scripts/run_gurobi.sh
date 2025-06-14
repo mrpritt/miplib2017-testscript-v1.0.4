@@ -42,7 +42,11 @@ then
 	echo "=infeas=" > $SOLFILE
     else
 	# grep objective out off the Gurobi log file
-	grep "Best objective " gurobi.log | sed 's/.*objective \([0-9\.eE+-]*\), .*/=obj= \1/g' > $SOLFILE.tmp
+    if grep "Best objective " gurobi.log > /dev/null; then
+	  grep "Best objective " gurobi.log | sed 's/.*objective \([0-9\.eE+-]*\), .*/=obj= \1/g' > $SOLFILE.tmp
+    else
+	  grep "Optimal objective " gurobi.log | sed 's/.*objective \([0-9\.eE+-]*\)/=obj= \1/g' > $SOLFILE.tmp
+    fi
         sed '  /# /d;
                /Solution for/d' $SOLFILE | grep -v "MPS_Rg" >> $SOLFILE.tmp
 	mv $SOLFILE.tmp $SOLFILE
