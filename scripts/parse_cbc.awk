@@ -22,7 +22,8 @@ BEGIN {
    gap = 0;
 }
 
-# The solver version
+# The solver version   print STDERR "CBC version: " solverversion;
+
 /^Version:/ {
    version = $2;
 }
@@ -76,4 +77,13 @@ BEGIN {
 
 /^Enumerated nodes:/ {
    bbnodes = $3
+}
+
+END {
+   # set default values
+   #print STDERR "CBC version: ," solverversion ",";
+
+   if (solverversion == "?") {
+    # solverversion = version;
+   }
 }

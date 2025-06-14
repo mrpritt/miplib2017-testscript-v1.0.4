@@ -54,6 +54,9 @@ awk '
 	 printf ("=infeas= \n");
       exit;
    }
+   /^\*\*/ { ## permits infeasible solutions, marked by "**"
+      printf ("%s %s \n", $3, $4); ; next;
+   }
    //{
       printf ("%s %s \n", $2, $3);
    }' $SOLFILE | tee $TMPFILE

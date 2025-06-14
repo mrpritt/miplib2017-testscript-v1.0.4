@@ -62,3 +62,16 @@ match($0, "Solution status[[:space:]]*: ") {
     pb = solver_objsense * infty;
    }
 }
+match($0, /^Status:[[:space:]]*([^ ]+)[[:space:]]+Objective:[[:space:]]*([^ ]+)[[:space:]]+Iterations:[[:space:]]*([^ ]+)[[:space:]]+Time:[[:space:]]*([^ ]+)/, arr) {
+    status = arr[1];
+    pb = arr[2];
+    if (status == "Optimal") {
+        aborted = 0;
+        timeout = 1
+        db = pb;
+    }
+}
+/Solving finished/ {
+    aborted = 0;
+    timeout = 0;
+}

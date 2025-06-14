@@ -46,11 +46,18 @@ match($0, /Status[ \t]*/) {
         aborted = 0;
         db = pb;
     } else if (st == "Infeasible") {
+        pb = +infty;
+        db = +infty;
         aborted = 0;
+        timeout = 0;
     } else if (st == "Unbounded") {
+        pb = -infty;
+        db = -infty;
         aborted = 0;
+        timeout = 0;
     } else if (st == "Primal infeasible or unbounded") {
         aborted = 0;
+        timeout = 0;
     } else if (st == "Time limit reached") {
         aborted = 0;
         timeout = 1;
@@ -63,11 +70,18 @@ match($0, "Model status[[:space:]]*:") {
         aborted = 0;
         db = pb;
     } else if (st == "Infeasible") {
+        pb = +infty;
+        db = +infty;
         aborted = 0;
+        timeout = 0;
     } else if (st == "Unbounded") {
+        pb = -infty;
+        db = -infty;
         aborted = 0;
+        timeout = 0;
     } else if (st == "Primal infeasible or unbounded") {
         aborted = 0;
+        timeout = 0;
     } else if (st == "Time limit reached") {
         aborted = 0;
         timeout = 1;
