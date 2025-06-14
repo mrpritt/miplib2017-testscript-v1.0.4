@@ -44,6 +44,7 @@ match($0, /Status[ \t]*/) {
     st = substr($0, index($0, $2));
     if (st == "Optimal") {
         aborted = 0;
+        db = pb;
     } else if (st == "Infeasible") {
         aborted = 0;
     } else if (st == "Unbounded") {
