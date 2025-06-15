@@ -3,7 +3,7 @@ import re
 import sys
 import csv
 
-def process_file(file_path):
+def process_file(file_path, writer, header_written=False):
     # Read the file
     with open(file_path, 'r') as f:
         lines = f.readlines()
@@ -64,16 +64,28 @@ def process_file(file_path):
 
     # Extract metadata
     metadata = {}
+    metadata_keys = {
+        '01': 'solver',
+        '02': 'timelimit',
+        '03': 'source'
+    }
+
     for line in metadata_lines:
         match = re.match(r'@(\d+)\s+(.*)', line)
         if match:
-            key = match.group(2).split(':')[0].strip()
-            value = match.group(2).split(':', 1)[1].strip() if ':' in match.group(2) else match.group(2).strip()
-            metadata[key] = value
+            id_num = match.group(1)
+            content = match.group(2)
+
+            # Use the predefined key names based on the ID number
+            if id_num in metadata_keys:
+                key = metadata_keys[id_num]
+                value = content.split(':', 1)[1].strip() if ':' in content else content.strip()
+                metadata[key] = value
 
     # Add metadata columns to headers
     for key in metadata:
-        headers.append(key)
+        if key not in headers:
+            headers.append(key)
 
     # Add metadata values to each row
     for row in data_rows:
@@ -81,14 +93,56 @@ def process_file(file_path):
             row.append(value)
 
     # Output as CSV
-    writer = csv.writer(sys.stdout)
-    writer.writerow(headers)
-    for row in data_rows:
-        writer.writerow(row)
+    if not header_written:
+        writer.writerow(headers)
+        return headers, data_rows, True
+    else:
+        return headers, data_rows, header_written
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <input_file>")
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <input_file1> [<input_file2> ...]")
         sys.exit(1)
-
-    process_file(sys.argv[1])
+    
+    writer = csv.writer(sys.stdout)
+    header_written = False
+    all_headers = None
+    
+    # First pass: collect all headers from all files to ensure consistency
+    all_data = []
+    for file_path in sys.argv[1:]:
+        try:
+            # Process each file
+            headers, data_rows, _ = process_file(file_path, writer, True)  # Don't write headers yet
+            
+            if all_headers is None:
+                all_headers = headers
+            else:
+                # Add any new headers we encounter
+                for header in headers:
+                    if header not in all_headers:
+                        all_headers.append(header)
+            
+            all_data.append((headers, data_rows))
+        except Exception as e:
+            print(f"Error processing file {file_path}: {e}", file=sys.stderr)
+    
+    # Write the complete header once
+    if all_headers:
+        writer.writerow(all_headers)
+    
+    # Second pass: write all data with consistent columns
+    for headers, data_rows in all_data:
+        for row in data_rows:
+            # Create a full row with all headers
+            full_row = []
+            for header in all_headers:
+                if header in headers:
+                    idx = headers.index(header)
+                    if idx < len(row):
+                        full_row.append(row[idx])
+                    else:
+                        full_row.append("")
+                else:
+                    full_row.append("")
+            writer.writerow(full_row)
