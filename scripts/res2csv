@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+import re
+import sys
+import csv
+
+def process_file(file_path):
+    # Read the file
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+
+    # Extract table data
+    table_start = None
+    table_end = None
+    metadata_lines = []
+
+    for i, line in enumerate(lines):
+        if re.match(r'^-+\+-+\+-+\+', line) and table_start is None:
+            table_start = i
+        elif re.match(r'^-+\+-+\+-+\+', line) and table_start is not None:
+            table_end = i
+        elif line.startswith('@'):
+            metadata_lines.append(line.strip())
+
+    if table_start is None or table_end is None:
+        print("Error: Could not find table in the input file.")
+        return
+
+    # Extract headers
+    header_line = lines[table_start + 1].strip()
+    headers = [h.strip() for h in re.split(r'\s*\|\s*', header_line.strip('|'))]
+
+    # Extract data rows
+    data_rows = []
+    for i in range(table_start + 2, table_end):
+        line = lines[i].strip()
+        if not line or re.match(r'^-+\+-+\+-+\+', line):
+            continue
+
+        # Split by at least one whitespace followed by at least one whitespace
+        row_data = []
+        parts = re.split(r'\s+', line.strip())
+
+        # The first column might contain spaces, so we need to handle it separately
+        current_value = ""
+        for part in parts:
+            if len(row_data) == 0:
+                if part.strip() and (part.strip() in ['ok', 'abort', '--'] or part.isdigit() or 'e+' in part or '-' in part):
+                    row_data.append(current_value.strip())
+                    row_data.append(part)
+                    current_value = ""
+                else:
+                    current_value += " " + part if current_value else part
+            else:
+                row_data.append(part)
+
+        if current_value and not row_data:
+            row_data.append(current_value.strip())
+
+        # Ensure we have the right number of columns
+        while len(row_data) < len(headers):
+            row_data.append("")
+
+        data_rows.append(row_data[:len(headers)])
+
+    # Extract metadata
+    metadata = {}
+    for line in metadata_lines:
+        match = re.match(r'@(\d+)\s+(.*)', line)
+        if match:
+            key = match.group(2).split(':')[0].strip()
+            value = match.group(2).split(':', 1)[1].strip() if ':' in match.group(2) else match.group(2).strip()
+            metadata[key] = value
+
+    # Add metadata columns to headers
+    for key in metadata:
+        headers.append(key)
+
+    # Add metadata values to each row
+    for row in data_rows:
+        for key, value in metadata.items():
+            row.append(value)
+
+    # Output as CSV
+    writer = csv.writer(sys.stdout)
+    writer.writerow(headers)
+    for row in data_rows:
+        writer.writerow(row)
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} <input_file>")
+        sys.exit(1)
+
+    process_file(sys.argv[1])
