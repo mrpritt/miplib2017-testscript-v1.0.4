@@ -103,18 +103,18 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <input_file1> [<input_file2> ...]")
         sys.exit(1)
-    
+
     writer = csv.writer(sys.stdout)
     header_written = False
     all_headers = None
-    
+
     # First pass: collect all headers from all files to ensure consistency
     all_data = []
     for file_path in sys.argv[1:]:
         try:
             # Process each file
             headers, data_rows, _ = process_file(file_path, writer, True)  # Don't write headers yet
-            
+
             if all_headers is None:
                 all_headers = headers
             else:
@@ -122,15 +122,15 @@ if __name__ == "__main__":
                 for header in headers:
                     if header not in all_headers:
                         all_headers.append(header)
-            
+
             all_data.append((headers, data_rows))
         except Exception as e:
             print(f"Error processing file {file_path}: {e}", file=sys.stderr)
-    
+
     # Write the complete header once
     if all_headers:
         writer.writerow(all_headers)
-    
+
     # Second pass: write all data with consistent columns
     for headers, data_rows in all_data:
         for row in data_rows:
